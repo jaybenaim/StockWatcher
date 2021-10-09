@@ -7,54 +7,56 @@ from .celery import app
 from django.apps import apps
 import requests
 
-logger = get_task_logger('stockWatcher')
+logger = get_task_logger("stockWatcher")
 
 try:
-  # Models
-  TICKER_WATCHER = apps.get_model(app_label="mainApp", model_name="TickerWatcher")
-  TICKERS = apps.get_model(app_label="mainApp", model_name="TickerWatcher")
+    # Models
+    TICKER_WATCHER = apps.get_model(app_label="mainApp", model_name="TickerWatcher")
+    TICKERS = apps.get_model(app_label="mainApp", model_name="TickerWatcher")
 
-  # Ticker Symbols
-  ticker_symbols = TICKER_WATCHER.objects.values_list('ticker__symbol').distinct()
-  all_ticker_symbols = []
+    # Ticker Symbols
+    ticker_symbols = TICKER_WATCHER.objects.values_list("ticker__symbol").distinct()
+    all_ticker_symbols = []
 
-  for ticker in ticker_symbols.all():
-    if ticker[0] not in all_ticker_symbols:
-      all_ticker_symbols.append(ticker[0])
+    for ticker in ticker_symbols.all():
+        if ticker[0] not in all_ticker_symbols:
+            all_ticker_symbols.append(ticker[0])
 
-  # Live Update
+    # Live Update
 except:
-  logger.error(msg='failed to load models')
+    logger.error(msg="failed to load models")
 
 # STOCK UPDATES
 @app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
-  sender.add_periodic_task(
-    # PRODUCTION
-    crontab(day_of_week='1-5', hour='09-16', minute='*/30'), # not working and invalid for unknown timezone
-    # DEVELOPMENT
-    # 1800,
-    # 30,
-    refresh_symbols.s(),
-    name='stocks refreshed every 30 minutes'
-  )
+    sender.add_periodic_task(
+        # PRODUCTION
+        # crontab(day_of_week='1-5', hour='09-16', minute='*/30'), # not working and invalid for unknown timezone
+        # DEVELOPMENT
+        # 1800,
+        60,
+        refresh_symbols.s(),
+        name="stocks refreshed every 30 minutes",
+    )
+
 
 #  RUN IN PROD ONLY
 
 # Refresh Stocks
 @app.task
 def refresh_symbols():
-  """Refresh the Tickers price with the current live price"""
-  # print(f'Keeping heroku alive')
-  # logger.info(f'Keeping Heroku alive')
-  # response = requests.get('/')
-  # logger.debug(response)
-  # print(response)
-  logger.info(f'Getting price updates for these tickers: {all_ticker_symbols}')
-  live_update = LivePriceUpdate(symbols=all_ticker_symbols)
-  live_update.get_quotes_from_yahoo()
-  # may need for big list of ticker_watchers (time to load can take unknown time)
-  # send_message_if_ticker_watcher_is_out_of_range.delay()
+    """Refresh the Tickers price with the current live price"""
+    # print(f'Keeping heroku alive')
+    # logger.info(f'Keeping Heroku alive')
+    # response = requests.get('/')
+    # logger.debug(response)
+    # print(response)
+    logger.info(f"Getting price updates for these tickers: {all_ticker_symbols}")
+    live_update = LivePriceUpdate(symbols=all_ticker_symbols)
+    live_update.get_quotes_from_yahoo()
+    # may need for big list of ticker_watchers (time to load can take unknown time)
+    # send_message_if_ticker_watcher_is_out_of_range.delay()
+
 
 # @app.task
 # def send_message_if_ticker_watcher_is_out_of_range():
