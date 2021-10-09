@@ -188,8 +188,11 @@ LOGGING = {
     },
 }
 
-# CELERY_BROKER_URL = 'amqp://localhost'
-CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+
+if os.environ["APP_ENV"] == "production":
+    CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+else:
+    CELERY_BROKER_URL = os.environ["LOCAL_CELERY_BROKER_URL"]
 
 
 # CORS_ORIGIN_ALLOW_ALL = True

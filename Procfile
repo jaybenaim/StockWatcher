@@ -1,4 +1,4 @@
-worker: celery -A mainApp.celery worker -B -l info -E concurrency 2
+worker: celery -A mainApp.celery worker -B -l info -E
 
 web: gunicorn StockWatcher.wsgi
 
