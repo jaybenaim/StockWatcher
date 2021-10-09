@@ -38,8 +38,9 @@ document.addEventListener("DOMContentLoaded", function() {
       // if filter (search by name)
       // param = '&include_name_in_search='true'
       await axios.get(`/stock/search?query=${input.value}`)
-      .then(({ data: { data }}) => {
-        for (const ticker of data) {
+      .then(({ data: { results }}) => {
+        console.log(results)
+        for (const ticker of results) {
           const el = document.createElement('div')
           const symbol = ticker.split('-')[0].replace(' ', '')
 
@@ -67,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function() {
     form.after(el)
 
     // Protected route (Must be superuser)
-      return await axios.get(`/search/live_update/?symbol=${symbol}`)
+      return await axios.get(`/stock/live_update/?symbol=${symbol}`)
       .then(({data}) => {
         const el = document.createElement('div')
         const previousElement = document.querySelector('.current-price')
@@ -99,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Create URL
         const watchButton = document.createElement('a')
         watchButton.innerText = 'Watch This Stock?'
-        watchButton.href = `search/watch/${symbol}/?price=${data.price}`
+        watchButton.href = `watch_stock?symbol=${symbol}&price=${data.price}`
 
         form.after(el)
         el.after(watchButton)

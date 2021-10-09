@@ -33,8 +33,8 @@ def setup_periodic_tasks(sender, **kwargs):
         # PRODUCTION
         # crontab(day_of_week='1-5', hour='09-16', minute='*/30'), # not working and invalid for unknown timezone
         # DEVELOPMENT
-        # 1800,
-        60,
+        1800,
+        # 30,
         refresh_symbols.s(),
         name="stocks refreshed every 30 minutes",
     )
