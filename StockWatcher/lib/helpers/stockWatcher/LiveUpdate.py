@@ -1,4 +1,4 @@
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 import json
 from django.http.response import Http404
 import requests
@@ -8,7 +8,7 @@ import pandas as pd
 import yahoofinancials
 import yfinance as yf
 from StockWatcher.lib.helpers.stockWatcher.Messaging.Messaging import TwilioMessenger
-
+import time
 import os
 
 from yahoofinancials import YahooFinancials
@@ -99,8 +99,8 @@ class LivePriceUpdate:
 
             self.symbols = all_ticker_watchers
 
+        print(f"Getting price updates for these tickers: {self.symbols}")
         yahoo_financials = YahooFinancials(self.symbols)
-
         data = yahoo_financials.get_stock_price_data(reformat=True)
 
         if data:
@@ -115,6 +115,7 @@ class LivePriceUpdate:
         price = 0
 
         for count, symbol in enumerate(yahoo_data):
+            time.sleep(0.2)
             try:
                 ticker_data = yahoo_data[symbol]
                 if ticker_data["regularMarketPrice"]:
@@ -130,8 +131,6 @@ class LivePriceUpdate:
                 ready = True
 
         if ready:
-            self.ticker_watchers = TickerWatcher.objects.all()
-
             self.send_price_alert()
 
     # Limited by API
@@ -214,8 +213,9 @@ class LivePriceUpdate:
         --------------
         Price Alert!!!
         --------------
-        {tick['symbol']} - (MIN: {tick['min_price']} - MAX: {tick['max_price']})
-        Current Price {tick['price']}"""
+        {tick['symbol']}
+        (MIN: {tick['min_price']} - MAX: {tick['max_price']})
+        Current Price {'ˇ' if tick['price'] < tick['min_price'] else ''}{'^' if tick['price'] > tick['max_price'] else ''}{tick['price']}"""
 
         if len(message) > 0:
             twilio.send_message_to_admin(message)
