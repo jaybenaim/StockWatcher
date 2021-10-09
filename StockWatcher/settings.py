@@ -35,6 +35,8 @@ ALLOWED_HOSTS = [
     "http://localhost:3000/home",
     "192.168.0.184",
     "192.168.0.91",
+    "0.0.0.0:5100",
+    "0.0.0.0",
 ]
 
 # Application definition
@@ -182,7 +184,7 @@ LOGGING = {
 }
 
 # CELERY_BROKER_URL = 'amqp://localhost'
-CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL_PROD"]
 
 
 # CORS_ORIGIN_ALLOW_ALL = True

@@ -1383,3 +1383,4 @@ INFO 2021-10-08 15:00:00,009 tasks.py.refresh_symbols:53 - Getting price updates
 INFO 2021-10-08 15:30:00,005 tasks.py.refresh_symbols:53 - Getting price updates for these tickers: ['AFRM', 'AMC', 'SOFI', 'SDC ']
 INFO 2021-10-08 16:00:00,004 tasks.py.refresh_symbols:53 - Getting price updates for these tickers: ['AFRM', 'AMC', 'SOFI', 'SDC ']
 INFO 2021-10-08 17:02:20,375 tasks.py.refresh_symbols:53 - Getting price updates for these tickers: ['AFRM', 'AMC', 'SOFI', 'SDC ']
+INFO 2021-10-09 18:02:01,044 tasks.py.refresh_symbols:53 - Getting price updates for these tickers: ['AFRM', 'AMC', 'SDC ', 'SOFI']
