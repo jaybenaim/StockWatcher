@@ -215,7 +215,7 @@ class LivePriceUpdate:
         --------------
         {tick['symbol']}
         (MIN: {tick['min_price']} - MAX: {tick['max_price']})
-        Current Price {'ˇ' if tick['price'] < tick['min_price'] else ''}{'^' if tick['price'] > tick['max_price'] else ''}{tick['price']}"""
+        Current Price: {'ˇ' if tick['price'] < tick['min_price'] else ''}{'^' if tick['price'] > tick['max_price'] else ''}{tick['price']}"""
 
         if len(message) > 0:
             twilio.send_message_to_admin(message)
