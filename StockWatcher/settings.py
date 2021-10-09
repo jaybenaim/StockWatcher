@@ -37,7 +37,7 @@ ALLOWED_HOSTS = [
     "192.168.0.91",
     "0.0.0.0:5100",
     "0.0.0.0",
-    "stock-watcher-api.herokuapp.com/",
+    "stock-watcher-api.herokuapp.com",
 ]
 
 # Application definition
