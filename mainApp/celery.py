@@ -15,6 +15,7 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 # app.autodiscover_tasks()
 
 app.conf.update(
+    BROKER_URL=os.environ["CELERY_BROKER_URL_PROD2"],
     task_serializer="json",
     accept_content=["json"],  # Ignore other content
     result_serializer="json",
