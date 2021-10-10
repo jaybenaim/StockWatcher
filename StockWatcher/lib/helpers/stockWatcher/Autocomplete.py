@@ -17,9 +17,7 @@ class TickerAutocomplete:
         self.autocomplete_results = autocomplete_results
         self.symbols = symbols
 
-        with open(
-            os.path.join(settings.BASE_DIR, "stockWatcher/lib/data/ticks.json"), "r"
-        ) as f:
+        with open("../../data/ticks.json", "r") as f:
             self.tickers = json.load(f)
 
     # def tickr_autocomplete(self, query):
