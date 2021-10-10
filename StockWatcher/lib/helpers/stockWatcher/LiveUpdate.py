@@ -37,11 +37,14 @@ twilio = TwilioMessenger()
 
 
 class LivePriceUpdate:
-    def __init__(self, symbol="", symbols=[], tickers=[], ticker_watchers=[]):
+    def __init__(
+        self, symbol="", symbols=[], tickers=[], ticker_watchers=[], yahoo_init=""
+    ):
         self.symbol = symbol
         self.symbols = symbols
         self.tickers = tickers
         self.ticker_watchers = ticker_watchers
+        self.yahoo_financials = YahooFinancials(yahoo_init)
 
     def syncProdData(self):
         prod_url = "https://vast-crag-37829.herokuapp.com/search/"
@@ -73,14 +76,11 @@ class LivePriceUpdate:
             return self.get_quote_from_yahoo()
 
     def yahoo_get_summary(self):
-        yahoo_financials = YahooFinancials(self.symbols)
-
-        return yahoo_financials.get_summary_data()
+        return self.yahoo_financials.get_summary_data()
 
     # GET Single FREE_REALTIME YAHOOFINANCES PYPI
     def get_quote_from_yahoo(self):
-        yahoo_financials = YahooFinancials(self.symbol)
-        data = yahoo_financials.get_stock_price_data(reformat=False)
+        data = self.yahoo_financials.get_stock_price_data(reformat=False)
 
         formatted_price = ""
         try:
@@ -99,9 +99,9 @@ class LivePriceUpdate:
 
             self.symbols = all_ticker_watchers
 
+        self.yahoo_financials = YahooFinancials(self.symbols)
         print(f"Getting price updates for these tickers: {self.symbols}")
-        yahoo_financials = YahooFinancials(self.symbols)
-        data = yahoo_financials.get_stock_price_data(reformat=True)
+        data = self.yahoo_financials.get_stock_price_data(reformat=True)
 
         if data:
             self.update_price_list(yahoo_data=data)
