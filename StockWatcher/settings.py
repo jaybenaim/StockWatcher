@@ -24,7 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["STOCK_WATCHER_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+if os.environ["APP_ENV"] == "production":
+    DEBUG = False
+else:
+    DEBUG = True
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -38,6 +41,8 @@ ALLOWED_HOSTS = [
     "0.0.0.0:5100",
     "0.0.0.0",
     "stock-watcher-api.herokuapp.com",
+    "jaybenaim.github.io",
+    "jaybenaim.github.io/StockWatcherClient",
 ]
 
 # Application definition
