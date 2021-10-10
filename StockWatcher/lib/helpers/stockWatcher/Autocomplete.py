@@ -2,9 +2,8 @@ import json
 
 import requests
 import re
-import csv
 import os
-from StockWatcher import settings
+from .ticks import tickers
 
 FINNHUB_KEY = os.environ["FINNHUB_KEY"]
 
@@ -17,8 +16,9 @@ class TickerAutocomplete:
         self.autocomplete_results = autocomplete_results
         self.symbols = symbols
 
-        with open("../../data/ticks.json", "r") as f:
-            self.tickers = json.load(f)
+        # with open("../../data/ticks.json", "r") as f:
+        #     self.tickers = json.load(f)
+        self.tickers = tickers
 
     # def tickr_autocomplete(self, query):
     #   results = []
