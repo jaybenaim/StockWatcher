@@ -95,21 +95,31 @@ class TickerviewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = TickerSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         """Return 20 tickers from the most recently updated tickers"""
 
-        if self.request.query_params.get("all") == "true":
-            return Ticker.objects.all()
-        else:
-            tickers = []
-            for ticker in Ticker.objects.all():
-                if ticker.is_recent():
-                    tickers.append(ticker)
-            if len(tickers) == 0:
-                return Ticker.objects.all().order_by("-updated_at")[:20]
-            return tickers
+        if self.request.method == "GET":
+            if self.request.query_params.get("all") == "true":
+                return Ticker.objects.all()
+            else:
+                tickers = []
+                for ticker in Ticker.objects.all():
+                    if ticker.is_recent():
+                        tickers.append(ticker)
+                if len(tickers) == 0:
+                    return Ticker.objects.all().order_by("-updated_at")
+                return tickers
+
+    def create(self, request, *args, **kwargs):
+        return HttpResponseBadRequest("Cannot create tickers.")
+
+    def update(self, request, *args, **kwargs):
+        return HttpResponseBadRequest("Cannot update tickers.")
+
+    def destroy(self, request, *args, **kwargs):
+        return HttpResponseBadRequest("Cannot destroy tickers.")
 
 
 class TickerWatcherViewSet(viewsets.ModelViewSet):
