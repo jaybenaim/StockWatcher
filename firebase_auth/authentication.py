@@ -27,10 +27,17 @@ firebase_config = {
 
 cred = credentials.Certificate(firebase_config)
 
-default_app = firebase_admin.initialize_app(cred, {'databaseURL': os.environ.get("FIREBASE_DATABASE_URL")})
+default_app = firebase_admin.initialize_app(
+    cred, {"databaseURL": os.environ.get("FIREBASE_DATABASE_URL")}
+)
+
 
 class FirebaseAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
+
+        if request.method == "GET":
+            return
+
         auth_header = request.META.get("HTTP_AUTHORIZATION")
 
         if not auth_header:

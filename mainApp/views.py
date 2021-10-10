@@ -127,7 +127,7 @@ class TickerWatcherViewSet(viewsets.ModelViewSet):
     API - All Ticker Watchers
     """
 
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     queryset = TickerWatcher.objects.all()
     serializer_class = TickerWatcherSerializer
 
@@ -145,6 +145,15 @@ class TickerWatcherViewSet(viewsets.ModelViewSet):
             watchers = TickerWatcher.objects.all()
 
         return watchers
+
+    def create(self, request, *args, **kwargs):
+        return HttpResponseBadRequest("Cannot create ticker watchers.")
+
+    def update(self, request, *args, **kwargs):
+        return HttpResponseBadRequest("Cannot update ticker watchers.")
+
+    def destroy(self, request, *args, **kwargs):
+        return HttpResponseBadRequest("Cannot destroy ticker watchers.")
 
 
 class TickrAutocomplete(FormView):
