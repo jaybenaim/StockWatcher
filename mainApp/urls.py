@@ -16,17 +16,17 @@ Including another URLconf
 from django.urls import path
 from . import views
 
-app_name = 'mainApp'
+app_name = "mainApp"
 
 urlpatterns = [
     path("search/", views.AutoCompleteSearch, name="autocomplete"),
     path("summary/", views.StockSummary, name="stockSummary"),
-    path('watch/', views.WatchStock, name="watchStock"),
+    path("watch/", views.WatchStock, name="watchStock"),
     # path('', IndexView.as_view(), name="index"),
     # path("", views.VoteForCatsView.as_view(), name="home"),
-    path("", views.TickrAutocomplete.as_view(), name="search"),
-    path("live_update/", views.LivePriceUpdateView.as_view(), name="live_update"),
-    path('watch_stock/', views.WatchStockFormView.as_view(), name="watch_stock"),
-    path('send_message/', views.SendMessageFormView.as_view(), name="send_message"),
-    path('test/', views.TestView, name="test"),
+    # path("", views.TickrAutocomplete.as_view(), name="search"),
+    # path("live_update/", views.LivePriceUpdateView.as_view(), name="live_update"),
+    # path('watch_stock/', views.WatchStockFormView.as_view(), name="watch_stock"),
+    # path('send_message/', views.SendMessageFormView.as_view(), name="send_message"),
+    path("test/", views.TestView, name="test"),
 ]

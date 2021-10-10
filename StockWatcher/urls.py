@@ -24,14 +24,17 @@ from django.conf import settings
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register(r'api/users', views.UserViewSet)
-router.register(r'api/groups', views.GroupViewSet)
-router.register(r'api/tickers', views.TickerviewSet, basename="tickers")
-router.register(r'api/watchers', views.TickerWatcherViewSet)
+router.register(r"api/users", views.UserViewSet)
+router.register(r"api/groups", views.GroupViewSet)
+router.register(r"api/tickers", views.TickerviewSet, basename="tickers")
+router.register(r"api/watchers", views.TickerWatcherViewSet)
+router.register(r"api/profiles", views.ProfileViewSet)
+router.register(r"api/images", views.ImageViewSet)
+
 # router.register(r'api/tickers/recent', views.RecentTickerView)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
     path("api-auth/", include("rest_framework.urls"), name="rest_framework"),
     path("admin/", admin.site.urls),
     path("api/stock/", include("mainApp.urls")),

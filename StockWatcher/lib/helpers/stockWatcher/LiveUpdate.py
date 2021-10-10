@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import json
-from django.http.response import Http404
+from django.http.response import Http404, JsonResponse
 import requests
 import websocket
 import finnhub
@@ -193,36 +193,44 @@ class LivePriceUpdate:
 
         for ticker_watcher in self.ticker_watchers:
             ticker = ticker_watcher.ticker
+            user_email = ticker_watcher.get_user()
+            user_phone = ticker_watcher.get_phone()
             if (ticker.price < ticker_watcher.min_price) or (
                 ticker.price > ticker_watcher.max_price
             ):
-                watcher_list[ticker.symbol] = {
-                    "symbol": ticker.symbol,
-                    "price": ticker.price,
-                    "min_price": ticker_watcher.min_price,
-                    "max_price": ticker_watcher.max_price,
-                }
+                if user_email not in watcher_list.keys():
+                    watcher_list[user_email] = {"phone": user_phone, "watchers": []}
 
-        message = ""
+                watcher_list[user_email]["watchers"].append(
+                    {
+                        "symbol": ticker.symbol,
+                        "price": ticker.price,
+                        "min_price": ticker_watcher.min_price,
+                        "max_price": ticker_watcher.max_price,
+                    }
+                )
 
-        for symbol in watcher_list:
-            tick = watcher_list[symbol]
-            message += f"""
-        ---------------------
+        for user_email in watcher_list:
+            watchers = watcher_list[user_email]["watchers"]
+            phone = watcher_list[user_email]["phone"]
 
-        --------------
-        Price Alert!!!
-        --------------
-        {tick['symbol']}
-        (MIN: {tick['min_price']} - MAX: {tick['max_price']})
-        Current Price: {'↓' if tick['price'] < tick['min_price'] else ''}{'↑' if tick['price'] > tick['max_price'] else ''}{tick['price']}"""
+            message = ""
+            for watcher in watchers:
+                message += f"""
+                ---------------------
 
-        if len(message) > 0:
-            twilio.send_message_to_admin(message)
+                --------------
+                Price Alert!!!
+                --------------
+                {watcher['symbol']}
+                (MIN: {watcher['min_price']} - MAX: {watcher['max_price']})
+                Current Price: {'↓' if watcher['price'] < watcher['min_price'] else ''}{'↑' if watcher['price'] > watcher['max_price'] else ''}{watcher['price']}"""
+
+            if len(message) > 0:
+                # twilio.send_message_to_admin(message)
+                twilio.send_message_to_watcher(message, phone)
+
         return watcher_list
-
-    # def update_price_in_ticks(self):
-    #   f = open('/data/ticks.py', 'w+')
 
     def get_candles(self):
         # r = requests.get(f'https://finnhub.io/api/v1/stock/candle?symbol=AAPL&resolution=1&from=1615298999&to=1615302599&token={FINN}')

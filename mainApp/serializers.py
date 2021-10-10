@@ -1,4 +1,4 @@
-from mainApp.models import Ticker, TickerWatcher
+from mainApp.models import Image, Profile, Ticker, TickerWatcher
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 
@@ -14,8 +14,8 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         model = Group
         fields = ["url", "name"]
 
-class TickerSerializer(serializers.HyperlinkedModelSerializer):
 
+class TickerSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Ticker
         fields = [
@@ -26,6 +26,7 @@ class TickerSerializer(serializers.HyperlinkedModelSerializer):
             "created_at",
             "updated_at",
         ]
+
 
 class TickerWatcherSerializer(serializers.HyperlinkedModelSerializer):
     user = UserSerializer(many=False, read_only=True)
@@ -39,6 +40,29 @@ class TickerWatcherSerializer(serializers.HyperlinkedModelSerializer):
             "ticker",
             "min_price",
             "max_price",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class ImageSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Image
+        fields = ["id", "as_url", "as_file"]
+
+
+class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+    user = UserSerializer(many=False, read_only=True)
+    avatar_url = ImageSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = [
+            "id",
+            "user",
+            "display_name",
+            "avatar_url",
+            "phone",
             "created_at",
             "updated_at",
         ]

@@ -122,9 +122,9 @@ class GmailMessage:
         print(response.text)
 
 
-G = GmailMessage()
+# G = GmailMessage()
 
-G.send_text_with_d7("TERST")
+# G.send_text_with_d7("TERST")
 
 # import asyncio
 # import re

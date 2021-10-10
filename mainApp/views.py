@@ -18,11 +18,13 @@ from django.views.generic.base import View
 from django.views.generic.edit import FormView
 from django.urls import reverse
 from .forms import SendMessageForm, TickrAutocomplete, WatchStockForm
-from .models import Ticker, TickerWatcher
+from .models import Image, Profile, Ticker, TickerWatcher
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User, Group
 from rest_framework import generics, viewsets, permissions, mixins
 from mainApp.serializers import (
+    ImageSerializer,
+    ProfileSerializer,
     TickerSerializer,
     TickerWatcherSerializer,
     UserSerializer,
@@ -52,6 +54,28 @@ class UserViewSet(viewsets.ModelViewSet):
             user.username = email
             user.save()
 
+        new_profile = Profile.objects.get_or_create(user_id=user.id)[0]
+
+        if not new_profile.display_name:
+            new_profile.display_name = email
+            new_profile.save()
+
+            # Assign the avatar_url
+            avatar = request.data["avatar_url"] or {"as_url": "", "as_file": ""}
+
+            if "url" in avatar.keys() and avatar["url"]:
+                if avatar["url"] != "":
+                    new_profile.avatar_url = Image.objects.get_or_create(
+                        as_url=avatar["url"]
+                    )[0]
+                elif avatar["image"]:
+                    # @TODO Init image upload
+                    new_profile.avatar_url = Image.objects.create(
+                        as_file=avatar["image"]
+                    )
+
+            new_profile.save()
+
         return JsonResponse(
             {
                 "id": user.id,
@@ -59,6 +83,42 @@ class UserViewSet(viewsets.ModelViewSet):
                 "username": user.username,
             }
         )
+
+
+# Create your views here.
+class ImageViewSet(viewsets.ModelViewSet):
+    """
+    API - Image Upload
+    """
+
+    queryset = Image.objects.all()
+    serializer_class = ImageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        """Image upload"""
+        print(request)
+
+        return JsonResponse({})
+
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    """
+    API - Profiles
+    """
+
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        """Get Profiles by user id"""
+        query_param = self.request.query_params.get("user")
+
+        if query_param:
+            return Profile.objects.filter(user__id=query_param)
+        else:
+            return Profile.objects.all()
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -376,16 +436,21 @@ class SendMessageFormView(FormView):
 
 def TestView(request):
 
-    if request.method == "GET":
-        try:
-            tickers = ["IDEX", "BB", "CLNE", "AMC", "CCL", "JMIA", "TRCH"]
-            live_update = LivePriceUpdate(symbols=tickers, yahoo_init=tickers)
-            data = live_update.get_quotes_from_yahoo()
-            print(data)
-            return HttpResponse(content=data)
+    a = LivePriceUpdate()
+    b = a.send_price_alert()
 
-        except:
-            return HttpResponseBadRequest(content="Error")
+    return JsonResponse(b, safe=False)
+
+    # if request.method == "GET":
+    #     try:
+    #         tickers = ["IDEX", "BB", "CLNE", "AMC", "CCL", "JMIA", "TRCH"]
+    #         live_update = LivePriceUpdate(symbols=tickers, yahoo_init=tickers)
+    #         data = live_update.get_quotes_from_yahoo()
+    #         print(data)
+    #         return HttpResponse(content=data)
+
+    #     except:
+    #         return HttpResponseBadRequest(content="Error")
 
 
 def AutoCompleteSearch(request):
