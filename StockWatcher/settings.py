@@ -25,7 +25,7 @@ SECRET_KEY = os.environ["STOCK_WATCHER_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if os.environ["APP_ENV"] == "production":
-    DEBUG = True
+    DEBUG = False
 else:
     DEBUG = True
 
