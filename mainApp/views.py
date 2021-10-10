@@ -206,15 +206,6 @@ class TickerWatcherViewSet(viewsets.ModelViewSet):
 
         return watchers
 
-    def create(self, request, *args, **kwargs):
-        return HttpResponseBadRequest("Cannot create ticker watchers.")
-
-    def update(self, request, *args, **kwargs):
-        return HttpResponseBadRequest("Cannot update ticker watchers.")
-
-    def destroy(self, request, *args, **kwargs):
-        return HttpResponseBadRequest("Cannot destroy ticker watchers.")
-
 
 class TickrAutocomplete(FormView):
     template_name = "./index.html"
