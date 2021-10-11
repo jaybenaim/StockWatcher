@@ -195,7 +195,6 @@ class TickerWatcherViewSet(viewsets.ModelViewSet):
         email = self.request.GET.get("email")
         symbol = self.request.GET.get("symbol")
 
-        print(f"Email {email} S {symbol}")
         if symbol == None and email:
             watchers = TickerWatcher.objects.filter(user__email=email)
         if symbol and email:
@@ -205,7 +204,6 @@ class TickerWatcherViewSet(viewsets.ModelViewSet):
         else:
             watchers = TickerWatcher.objects.all()
 
-        print(watchers)
         return watchers
 
 
