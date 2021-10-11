@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
 
 logger = logging.getLogger(__name__)
 
@@ -65,12 +66,15 @@ class MessageClient:
         logger.debug("Twilio client initialized")
 
     def send_message(self, body, to):
-        self.twilio_client.messages.create(
-            body=body,
-            to=to,
-            from_=self.TWILIO_NUMBER,
-            # media_url=['https://demo.twilio.com/owl.png']
-        )
+        try:
+            self.twilio_client.messages.create(
+                body=body,
+                to=to,
+                from_=self.TWILIO_NUMBER,
+                # media_url=['https://demo.twilio.com/owl.png']
+            )
+        except TwilioRestException as e:
+            print(e)
 
 
 class TwilioNotificationsMiddleware:

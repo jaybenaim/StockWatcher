@@ -39,10 +39,10 @@ logger = get_task_logger("stockWatcher")
 def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(
         # PRODUCTION
-        crontab(day_of_week="1-5", hour="09-16", minute="*/30"),
+        # crontab(day_of_week="1-5", hour="09-16", minute="*/30"),
         # TEST
         # 1800,
-        # 60,
+        60,
         refresh_symbols.s(),
         name="stocks refreshed every 30 minutes",
     )
