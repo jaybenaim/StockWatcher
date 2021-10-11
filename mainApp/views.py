@@ -195,11 +195,16 @@ class TickerWatcherViewSet(viewsets.ModelViewSet):
         email = self.request.GET.get("email")
         symbol = self.request.GET.get("symbol")
 
+        if symbol:
+            symbol = symbol.strip()
+
         if symbol == None and email:
+            print("getting email only")
             watchers = TickerWatcher.objects.filter(user__email=email)
         if symbol and email:
+            print("getting both")
             watchers = TickerWatcher.objects.filter(
-                ticker__symbol=symbol, user__email=email
+                ticker__symbol__icontains=symbol, user__email=email
             )
         else:
             watchers = TickerWatcher.objects.all()
@@ -425,12 +430,12 @@ class SendMessageFormView(FormView):
         return HttpResponseRedirect(self.request.path)
 
 
-def TestView(request):
+# def TestView(request):
 
-    a = LivePriceUpdate()
-    b = a.send_price_alert()
+#     a = LivePriceUpdate()
+#     b = a.send_price_alert()
 
-    return JsonResponse(b, safe=False)
+#     return JsonResponse(b, safe=False)
 
     # if request.method == "GET":
     #     try:

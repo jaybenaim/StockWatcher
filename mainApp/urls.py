@@ -14,6 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
+
+from StockWatcher.lib.helpers.stockWatcher.Autocomplete import run_test
 from . import views
 
 app_name = "mainApp"
@@ -28,5 +30,5 @@ urlpatterns = [
     # path("live_update/", views.LivePriceUpdateView.as_view(), name="live_update"),
     # path('watch_stock/', views.WatchStockFormView.as_view(), name="watch_stock"),
     # path('send_message/', views.SendMessageFormView.as_view(), name="send_message"),
-    path("test/", views.TestView, name="test"),
+    path("test/", run_test, name="test"),
 ]

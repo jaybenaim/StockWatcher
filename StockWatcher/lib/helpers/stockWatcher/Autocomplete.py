@@ -4,6 +4,7 @@ import requests
 import re
 import os
 from .ticks import tickers
+from django.http.response import HttpResponse
 
 FINNHUB_KEY = os.environ["FINNHUB_KEY"]
 
@@ -99,9 +100,9 @@ class TickerAutocomplete:
 
             data.append(tick)
 
-        f = open("StockWatcher/lib/data/ticks.json", "w+")
+        f = open("./ticks.py", "w+")
         f.truncate(0)
-        f.write(f"{json.dumps(data)}")
+        f.write(f"tickers = {json.dumps(data)}")
         f.close()
 
         return r.json()
@@ -115,5 +116,7 @@ class TickerAutocomplete:
         return next(matching_ticker)
 
 
-# a = TickerAutocomplete()
-# a.refresh_symbols()
+def run_test(request):
+    a = TickerAutocomplete()
+    a.refresh_symbols()
+    return HttpResponse("Success")
