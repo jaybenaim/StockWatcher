@@ -33,7 +33,6 @@ import matplotlib.pyplot as plt
 from iexfinance.stocks import get_historical_data
 
 # TWILIO MESSAGING SERVICE
-twilio = TwilioMessenger()
 
 
 class LivePriceUpdate:
@@ -45,6 +44,7 @@ class LivePriceUpdate:
         self.tickers = tickers
         self.ticker_watchers = ticker_watchers
         self.yahoo_financials = YahooFinancials(yahoo_init)
+        self.twilio = TwilioMessenger()
 
     def syncProdData(self):
         prod_url = "https://vast-crag-37829.herokuapp.com/search/"
@@ -99,11 +99,13 @@ class LivePriceUpdate:
 
             self.symbols = all_ticker_watchers
 
-        self.yahoo_financials = YahooFinancials(self.symbols)
-        print(f"Getting price updates for these tickers: {self.symbols}")
-        data = self.yahoo_financials.get_stock_price_data(reformat=True)
+        data = None
+        if self.symbols:
+            self.yahoo_financials = YahooFinancials(self.symbols)
+            print(f"Getting price updates for these tickers: {self.symbols}")
+            data = self.yahoo_financials.get_stock_price_data(reformat=True)
 
-        if data:
+        if data != None:
             self.update_price_list(yahoo_data=data)
         else:
             print("No data returned from yahoo")
@@ -111,6 +113,7 @@ class LivePriceUpdate:
         return data
 
     def update_price_list(self, yahoo_data):
+        print("Updating prices")
         ready = False
         price = 0
 
@@ -188,6 +191,7 @@ class LivePriceUpdate:
         ws.run_forever()
 
     def send_price_alert(self):
+        print("Sending price alerts")
         self.ticker_watchers = TickerWatcher.objects.all()
         watcher_list = {}
 
@@ -228,7 +232,7 @@ class LivePriceUpdate:
 
             if len(message) > 0:
                 # twilio.send_message_to_admin(message)
-                twilio.send_message_to_watcher(message, phone)
+                self.twilio.send_message_to_watcher(message, phone)
 
         return watcher_list
 

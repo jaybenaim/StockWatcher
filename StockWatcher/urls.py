@@ -38,5 +38,5 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls"), name="rest_framework"),
     path("admin/", admin.site.urls),
     path("api/stock/", include("mainApp.urls")),
-    # path("", views.TickrAutocomplete.as_view(), name="search"),
+    path("api/status/", views.db_status, name="status"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

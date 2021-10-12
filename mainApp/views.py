@@ -46,41 +46,43 @@ class UserViewSet(viewsets.ModelViewSet):
         # print(request.data)
         # is_login = request.data['is_login']
         email = request.data["email"]
+        username = request.data["username"]
         # Get or Create the user
         user = User.objects.get_or_create(email=email)[0]
 
         # If no username exists on the user assign the email address
         if not user.username:
-            user.username = email
+            user.username = username
             user.save()
 
         new_profile = Profile.objects.get_or_create(user_id=user.id)[0]
 
+        new_profile_serializer = ProfileSerializer(
+            new_profile, many=False, context={"request": request}
+        )
+
         if not new_profile.display_name:
-            new_profile.display_name = email
-            new_profile.save()
+            new_profile.display_name = username
 
-            # Assign the avatar_url
-            avatar = request.data["avatar_url"] or {"as_url": "", "as_file": ""}
+        # Assign the avatar_url
+        avatar = request.data["avatar"] or {"url": "", "file": ""}
 
-            if "url" in avatar.keys() and avatar["url"]:
-                if avatar["url"] != "":
-                    new_profile.avatar_url = Image.objects.get_or_create(
-                        as_url=avatar["url"]
-                    )[0]
-                elif avatar["image"]:
-                    # @TODO Init image upload
-                    new_profile.avatar_url = Image.objects.create(
-                        as_file=avatar["image"]
-                    )
+        if "url" in avatar.keys():
+            new_profile.avatar_url = Image.objects.get_or_create(as_url=avatar["url"])[
+                0
+            ]
+        if "file" in avatar.keys():
+            # @TODO Init image upload
+            new_profile.avatar_url = Image.objects.create(as_file=avatar["file"])
 
-            new_profile.save()
+        new_profile.save()
 
         return JsonResponse(
             {
                 "id": user.id,
                 "email": user.email,
                 "username": user.username,
+                "profile": new_profile_serializer.data,
             }
         )
 
@@ -199,7 +201,6 @@ class TickerWatcherViewSet(viewsets.ModelViewSet):
             symbol = symbol.strip()
 
         if symbol == None and email:
-            print("getting email only")
             watchers = TickerWatcher.objects.filter(user__email=email)
         if symbol and email:
             print("getting both")
@@ -437,16 +438,16 @@ class SendMessageFormView(FormView):
 
 #     return JsonResponse(b, safe=False)
 
-    # if request.method == "GET":
-    #     try:
-    #         tickers = ["IDEX", "BB", "CLNE", "AMC", "CCL", "JMIA", "TRCH"]
-    #         live_update = LivePriceUpdate(symbols=tickers, yahoo_init=tickers)
-    #         data = live_update.get_quotes_from_yahoo()
-    #         print(data)
-    #         return HttpResponse(content=data)
+# if request.method == "GET":
+#     try:
+#         tickers = ["IDEX", "BB", "CLNE", "AMC", "CCL", "JMIA", "TRCH"]
+#         live_update = LivePriceUpdate(symbols=tickers, yahoo_init=tickers)
+#         data = live_update.get_quotes_from_yahoo()
+#         print(data)
+#         return HttpResponse(content=data)
 
-    #     except:
-    #         return HttpResponseBadRequest(content="Error")
+#     except:
+#         return HttpResponseBadRequest(content="Error")
 
 
 def AutoCompleteSearch(request):
@@ -595,3 +596,7 @@ def Watchers(request):
             #   watcher_list.append(watcher.to_dict())
 
             return JsonResponse({"status": 200, "watchers": json_watchers}, safe=False)
+
+
+def db_status(request):
+    return JsonResponse({"status": "active", "timestamp": datetime.now()})
