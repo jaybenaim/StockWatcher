@@ -190,10 +190,13 @@ class LivePriceUpdate:
         ws.run_forever()
 
     def send_price_alert(self):
-        self.ticker_watchers = TickerWatcher.objects.all()
+        time.sleep(1)
+        ticker_watchers = TickerWatcher.objects.all()
+        self.ticker_watchers = ticker_watchers
+        time.sleep(1)
         watcher_list = {}
 
-        for ticker_watcher in self.ticker_watchers:
+        for ticker_watcher in ticker_watchers:
             ticker = ticker_watcher.ticker
             user_email = ticker_watcher.get_user()
             user_phone = ticker_watcher.get_phone()
