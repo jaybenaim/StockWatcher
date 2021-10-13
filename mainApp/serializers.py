@@ -53,7 +53,7 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     user = UserSerializer(many=False, read_only=True)
-    avatar_url = ImageSerializer(many=False, read_only=True)
+    avatar = ImageSerializer(many=False, read_only=True)
 
     class Meta:
         model = Profile
@@ -61,7 +61,7 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
             "id",
             "user",
             "display_name",
-            "avatar_url",
+            "avatar",
             "phone",
             "created_at",
             "updated_at",

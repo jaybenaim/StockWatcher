@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import json
+import re
 from django.core import serializers
 from django.db.models.fields import mixins
 from StockWatcher.lib.helpers.stockWatcher.Autocomplete import TickerAutocomplete
@@ -45,15 +46,12 @@ class UserViewSet(viewsets.ModelViewSet):
         """Create a user and profile in the django db and return the User"""
         # print(request.data)
         # is_login = request.data['is_login']
-        email = request.data["email"]
-        username = request.data["username"]
+        data = request.data
+
+        email = data["email"]
+        username = data["username"]
         # Get or Create the user
         user = User.objects.get_or_create(email=email)[0]
-
-        # If no username exists on the user assign the email address
-        if not user.username:
-            user.username = username
-            user.save()
 
         new_profile = Profile.objects.get_or_create(user_id=user.id)[0]
 
@@ -64,16 +62,13 @@ class UserViewSet(viewsets.ModelViewSet):
         if not new_profile.display_name:
             new_profile.display_name = username
 
-        # Assign the avatar_url
-        avatar = request.data["avatar"] or {"url": "", "file": ""}
+        if "avatar" in data.keys():
+            avatar = data["avatar"]
 
-        if "url" in avatar.keys():
-            new_profile.avatar_url = Image.objects.get_or_create(as_url=avatar["url"])[
-                0
-            ]
-        if "file" in avatar.keys():
-            # @TODO Init image upload
-            new_profile.avatar_url = Image.objects.create(as_file=avatar["file"])
+            if "as_url" in avatar.keys():
+                new_profile.avatar = Image.objects.get_or_create(
+                    as_url=avatar["as_url"]
+                )[0]
 
         new_profile.save()
 
@@ -81,7 +76,6 @@ class UserViewSet(viewsets.ModelViewSet):
             {
                 "id": user.id,
                 "email": user.email,
-                "username": user.username,
                 "profile": new_profile_serializer.data,
             }
         )
@@ -121,6 +115,42 @@ class ProfileViewSet(viewsets.ModelViewSet):
             return Profile.objects.filter(user__id=query_param)
         else:
             return Profile.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        profile_id = kwargs["pk"]
+        profile = get_object_or_404(Profile, pk=profile_id)
+        profile_serializer = ProfileSerializer(
+            profile, many=False, context={"request": request}
+        )
+
+        data = request.data
+        if "avatar" in data.keys():
+            avatar = data["avatar"]
+
+            if "as_url" in avatar.keys():
+                profile.avatar = Image.objects.get_or_create(as_url=avatar["as_url"])[0]
+
+            profile.save()
+
+            return JsonResponse(profile_serializer.data)
+        else:
+
+            for property_to_update in data.keys():
+                if property_to_update == "username":
+                    print("username", data["username"])
+                    profile.display_name = data["username"]
+                if property_to_update == "email":
+                    user = User.objects.get(id=profile.user.id)
+                    user.email = data["email"]
+                    user.save()
+                    profile.user = user
+                if property_to_update not in ["username", "email"]:
+                    setattr(profile, property_to_update, data[property_to_update])
+            print("username2", profile.display_name)
+
+            profile.save()
+            print("username2", profile.display_name)
+            return JsonResponse(profile_serializer.data)
 
 
 class GroupViewSet(viewsets.ModelViewSet):

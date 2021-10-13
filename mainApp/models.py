@@ -73,7 +73,7 @@ class TickerWatcher(models.Model):
 
 
 class Image(models.Model):
-    as_url = models.TextField(max_length=500, blank=True, null=True)
+    as_url = models.TextField(max_length=2048, blank=True, null=True)
     as_file = models.ImageField(
         blank=True, null=True, upload_to=make_unique_picture_filename
     )
@@ -81,11 +81,14 @@ class Image(models.Model):
     def __str__(self):
         return self.as_url or "Image missing or is a file"
 
+    def get_src(self):
+        return self.as_url if self.as_url else self.as_file
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=30, unique=True, blank=True)
-    avatar_url = models.ForeignKey(
+    avatar = models.ForeignKey(
         Image, on_delete=models.CASCADE, default=None, null=True, blank=True
     )
     phone = models.CharField(max_length=20, blank=True)
