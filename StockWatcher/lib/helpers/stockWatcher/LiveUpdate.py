@@ -1,22 +1,20 @@
 from datetime import datetime, timedelta
 import json
-from django.http.response import Http404, JsonResponse
 import requests
 import websocket
 import finnhub
-import pandas as pd
-import yahoofinancials
-import yfinance as yf
+
 from StockWatcher.lib.helpers.stockWatcher.Messaging.Messaging import TwilioMessenger
 import time
 import os
 
 from yahoofinancials import YahooFinancials
-from django.core import serializers
 from mainApp.models import Ticker, TickerWatcher
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db.models import F
+
+# import pandas as pd
 
 FINNHUB_KEY = os.environ["FINNHUB_KEY"]
 POLYGON_KEY = os.environ["POLYGON_KEY"]
@@ -28,11 +26,11 @@ finnhub_client = finnhub.Client(api_key=FINNHUB_KEY)
 finnhub_headers = {"Authorization": f"Bearer {POLYGON_KEY}"}
 
 # IEX STOCK DATA
-import pandas as pd
-from iexfinance.stocks import Stock
+# from iexfinance.stocks import Stock
 from datetime import datetime
-import matplotlib.pyplot as plt
-from iexfinance.stocks import get_historical_data
+
+# import matplotlib.pyplot as plt
+# from iexfinance.stocks import get_historical_data
 
 # TWILIO MESSAGING SERVICE
 
@@ -261,9 +259,8 @@ class LivePriceUpdate:
         print(res)
 
         # Convert to Pandas Dataframe
-        import pandas as pd
 
-        print(pd.DataFrame(res))
+        # print(pd.DataFrame(res))
 
     def get_bars(self):
         d30_days_ago = (datetime.now() - timedelta(30)).strftime("%Y-%m-%d")
@@ -273,11 +270,11 @@ class LivePriceUpdate:
         response = requests.get(url=url, headers=finnhub_headers)
         print(response.text)
 
-    def iex_get_historical_data(self):
-        start = datetime(2017, 1, 1)
-        end = datetime(2019, 8, 1)
-        df = get_historical_data("DIS", start, end, output_format="pandas")
-        print(df)
+    # def iex_get_historical_data(self):
+    #     start = datetime(2017, 1, 1)
+    #     end = datetime(2019, 8, 1)
+    #     df = get_historical_data("DIS", start, end, output_format="pandas")
+    #     print(df)
 
     # def purchase_stock():
 
