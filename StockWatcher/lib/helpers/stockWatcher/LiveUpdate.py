@@ -92,12 +92,11 @@ class LivePriceUpdate:
 
     # GET Multiple FREE_REALTIME YAHOOFINANCES PYPI
     def get_quotes_from_yahoo(self):
-        if len(self.symbols) < 1:
-            all_ticker_watchers = TickerWatcher.objects.values_list(
-                "ticker__symbol", flat=True
-            ).distinct()
+        all_ticker_watchers = TickerWatcher.objects.values_list(
+            "ticker__symbol", flat=True
+        ).distinct()
 
-            self.symbols = all_ticker_watchers
+        self.symbols = all_ticker_watchers
 
         data = None
         if self.symbols:
@@ -191,7 +190,6 @@ class LivePriceUpdate:
         ws.run_forever()
 
     def send_price_alert(self):
-        print("Sending price alerts")
         self.ticker_watchers = TickerWatcher.objects.all()
         watcher_list = {}
 
@@ -233,6 +231,10 @@ class LivePriceUpdate:
             if len(message) > 0:
                 # twilio.send_message_to_admin(message)
                 self.twilio.send_message_to_watcher(message, phone)
+
+        print(f"Watcher list {watcher_list}")
+        if len(watcher_list.keys()):
+            print("Sending price alerts")
 
         return watcher_list
 
