@@ -13,6 +13,15 @@ from .celery import app
 
 logger = get_task_logger("stockWatcher")
 
+# from celery import Task
+# from django.db import transaction
+
+
+# class BetterTask(Task):
+#     def delay_on_commit(self, *args, **kwargs):
+#         return transaction.on_commit(lambda: self.delay(*args, **kwargs))
+
+
 # try:
 #     # Models
 #     TICKER_WATCHER = apps.get_model(app_label="mainApp", model_name="TickerWatcher")
@@ -43,7 +52,7 @@ def setup_periodic_tasks(sender, **kwargs):
         # TEST
         # 1800,
         60,
-        refresh_symbols.s(),
+        refresh_symbols.delay(),
         name="stocks refreshed every 30 minutes",
     )
 
