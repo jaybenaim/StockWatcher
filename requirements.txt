@@ -13,6 +13,8 @@ click-didyoumean==0.3.0
 click-plugins==1.1.1
 click-repl==0.2.0
 Django==3.2.8
+django-background-tasks==1.2.5
+django-compat==1.0.15
 django-cors-headers==3.10.0
 djangorestframework==3.12.4
 finnhub-python==2.4.5
