@@ -133,7 +133,69 @@ class LivePriceUpdate:
                 ready = True
 
         if ready:
+            time.sleep(10)
             self.send_price_alert()
+
+    def send_price_alert(self):
+        time.sleep(2)
+        ticker_watchers = TickerWatcher.objects.filter(
+            Q(ticker__price__lt=F("min_price")) or Q(ticker__price__gt=F("max_price"))
+        )
+
+        if ticker_watchers.count() == 0:
+            print("No ticker watchers out of range")
+            return
+
+        self.ticker_watchers = ticker_watchers
+
+        print(ticker_watchers)
+        watcher_list = {}
+
+        for ticker_watcher in ticker_watchers:
+            ticker = ticker_watcher.ticker
+            user_email = ticker_watcher.get_user()
+            user_phone = ticker_watcher.get_phone()
+            print(
+                f"Tkr: {ticker.symbol}; min: {ticker_watcher.min_price}; max: {ticker_watcher.max_price}"
+            )
+
+            if user_email not in watcher_list.keys():
+                watcher_list[user_email] = {"phone": user_phone, "watchers": []}
+
+            watcher_list[user_email]["watchers"].append(
+                {
+                    "symbol": ticker.symbol,
+                    "price": ticker.price,
+                    "min_price": ticker_watcher.min_price,
+                    "max_price": ticker_watcher.max_price,
+                }
+            )
+
+        for user_email in watcher_list:
+            watchers = watcher_list[user_email]["watchers"]
+            phone = watcher_list[user_email]["phone"]
+
+            message = ""
+            for watcher in watchers:
+                message += f"""
+                ---------------------
+
+                --------------
+                Price Alert!!!
+                --------------
+                {watcher['symbol']}
+                (MIN: {watcher['min_price']} - MAX: {watcher['max_price']})
+                Current Price: {'↓' if watcher['price'] < watcher['min_price'] else ''}{'↑' if watcher['price'] > watcher['max_price'] else ''}{watcher['price']}"""
+
+            if len(message) > 0:
+                # twilio.send_message_to_admin(message)
+                self.twilio.send_message_to_watcher(message, phone)
+
+        print(f"Watcher list {watcher_list}")
+        if len(watcher_list.keys()):
+            print("Sending price alerts")
+
+        return watcher_list
 
     # Limited by API
     def get_quote_from_finnhub(self):
@@ -188,68 +250,6 @@ class LivePriceUpdate:
         )
         ws.on_open = self.on_open
         ws.run_forever()
-
-    def send_price_alert(self):
-        # ticker_watchers = TickerWatcher.objects.all()
-        ticker_watchers = TickerWatcher.objects.filter(
-            Q(ticker__price__lt=F("min_price")) or Q(ticker__price__gt=F("max_price"))
-        )
-
-        if ticker_watchers.count() == 0:
-            print("No ticker watchers out of range")
-            return
-
-        self.ticker_watchers = ticker_watchers
-        time.sleep(2)
-
-        print(ticker_watchers)
-        watcher_list = {}
-
-        for ticker_watcher in ticker_watchers:
-            ticker = ticker_watcher.ticker
-            user_email = ticker_watcher.get_user()
-            user_phone = ticker_watcher.get_phone()
-            print(
-                f"Tkr: {ticker.symbol}; min: {ticker_watcher.min_price}; max: {ticker_watcher.max_price}"
-            )
-
-            if user_email not in watcher_list.keys():
-                watcher_list[user_email] = {"phone": user_phone, "watchers": []}
-
-            watcher_list[user_email]["watchers"].append(
-                {
-                    "symbol": ticker.symbol,
-                    "price": ticker.price,
-                    "min_price": ticker_watcher.min_price,
-                    "max_price": ticker_watcher.max_price,
-                }
-            )
-
-        for user_email in watcher_list:
-            watchers = watcher_list[user_email]["watchers"]
-            phone = watcher_list[user_email]["phone"]
-
-            message = ""
-            for watcher in watchers:
-                message += f"""
-                ---------------------
-
-                --------------
-                Price Alert!!!
-                --------------
-                {watcher['symbol']}
-                (MIN: {watcher['min_price']} - MAX: {watcher['max_price']})
-                Current Price: {'↓' if watcher['price'] < watcher['min_price'] else ''}{'↑' if watcher['price'] > watcher['max_price'] else ''}{watcher['price']}"""
-
-            if len(message) > 0:
-                # twilio.send_message_to_admin(message)
-                self.twilio.send_message_to_watcher(message, phone)
-
-        print(f"Watcher list {watcher_list}")
-        if len(watcher_list.keys()):
-            print("Sending price alerts")
-
-        return watcher_list
 
     def get_candles(self):
         # r = requests.get(f'https://finnhub.io/api/v1/stock/candle?symbol=AAPL&resolution=1&from=1615298999&to=1615302599&token={FINN}')
