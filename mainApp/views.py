@@ -53,6 +53,10 @@ class UserViewSet(viewsets.ModelViewSet):
         # Get or Create the user
         user = User.objects.get_or_create(email=email)[0]
 
+        if not user.username:
+            user.username = username
+            user.save()
+
         new_profile = Profile.objects.get_or_create(user_id=user.id)[0]
 
         new_profile_serializer = ProfileSerializer(
@@ -62,13 +66,14 @@ class UserViewSet(viewsets.ModelViewSet):
         if not new_profile.display_name:
             new_profile.display_name = username
 
-        if "avatar" in data.keys():
-            avatar = data["avatar"]
+        if not new_profile.avatar.as_url or not new_profile.avatar.as_file:
+            if "avatar" in data.keys():
+                avatar = data["avatar"]
 
-            if "as_url" in avatar.keys():
-                new_profile.avatar = Image.objects.get_or_create(
-                    as_url=avatar["as_url"]
-                )[0]
+                if "as_url" in avatar.keys():
+                    new_profile.avatar = Image.objects.get_or_create(
+                        as_url=avatar["as_url"]
+                    )[0]
 
         new_profile.save()
 
@@ -137,7 +142,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
             for property_to_update in data.keys():
                 if property_to_update == "username":
-                    print("username", data["username"])
                     profile.display_name = data["username"]
                 if property_to_update == "email":
                     user = User.objects.get(id=profile.user.id)
@@ -146,10 +150,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     profile.user = user
                 if property_to_update not in ["username", "email"]:
                     setattr(profile, property_to_update, data[property_to_update])
-            print("username2", profile.display_name)
 
             profile.save()
-            print("username2", profile.display_name)
             return JsonResponse(profile_serializer.data)
 
 
