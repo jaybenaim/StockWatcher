@@ -117,15 +117,15 @@ class LivePriceUpdate:
         price = 0
 
         for count, symbol in enumerate(yahoo_data):
-            time.sleep(0.2)
+            time.sleep(1)
             try:
                 ticker_data = yahoo_data[symbol]
                 if ticker_data["regularMarketPrice"]:
                     price = ticker_data["regularMarketPrice"]
                     ticker = Ticker.objects.get(symbol=symbol)
-                    print(f"Symbol: {symbol}, Price: {price}")
                     ticker.price = price
                     ticker.save()
+                    print(f"Updated Symbol: {symbol}, Price: {price}")
             except:
                 print(f"Error updating prices for {symbol}")
 

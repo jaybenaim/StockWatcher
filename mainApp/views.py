@@ -32,6 +32,7 @@ from mainApp.serializers import (
     GroupSerializer,
 )
 
+from django.views.decorators.csrf import csrf_exempt
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -235,7 +236,6 @@ class TickerWatcherViewSet(viewsets.ModelViewSet):
         if symbol == None and email:
             watchers = TickerWatcher.objects.filter(user__email=email)
         if symbol and email:
-            print("getting both")
             watchers = TickerWatcher.objects.filter(
                 ticker__symbol__icontains=symbol, user__email=email
             )
@@ -533,6 +533,7 @@ def StockSummary(request):
         #     get_fresh_data()
 
 
+@csrf_exempt
 def WatchStock(request):
     if request.method == "POST":
         json_data = json.loads(request.body)
@@ -613,7 +614,6 @@ def WatchStock(request):
             }
 
             return JsonResponse(context)
-
 
 def Watchers(request):
     if request.method == "GET":
