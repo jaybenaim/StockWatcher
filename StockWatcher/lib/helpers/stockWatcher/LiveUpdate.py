@@ -13,6 +13,7 @@ from mainApp.models import Ticker, TickerWatcher
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db.models import F
+from django.db import transaction
 
 # import pandas as pd
 
@@ -37,13 +38,13 @@ from datetime import datetime
 
 class LivePriceUpdate:
     def __init__(
-        self, symbol="", symbols=[], tickers=[], ticker_watchers=[], yahoo_init=""
+        self, symbol="", symbols=[], tickers=[], ticker_watchers=[], yahoo_init=None
     ):
         self.symbol = symbol
         self.symbols = symbols
         self.tickers = tickers
         self.ticker_watchers = ticker_watchers
-        self.yahoo_financials = YahooFinancials(yahoo_init)
+        self.yahoo_financials = yahoo_init
         self.twilio = TwilioMessenger()
 
     def syncProdData(self):
@@ -76,10 +77,16 @@ class LivePriceUpdate:
             return self.get_quote_from_yahoo()
 
     def yahoo_get_summary(self):
+        if self.yahoo_financials == None:
+            self.yahoo_financials = YahooFinancials()
+
         return self.yahoo_financials.get_summary_data()
 
     # GET Single FREE_REALTIME YAHOOFINANCES PYPI
     def get_quote_from_yahoo(self):
+        if self.yahoo_financials == None:
+            self.yahoo_financials = YahooFinancials(self.symbol)
+
         data = self.yahoo_financials.get_stock_price_data(reformat=False)
 
         formatted_price = ""
@@ -109,15 +116,12 @@ class LivePriceUpdate:
         else:
             print("No data returned from yahoo")
 
-        return data
-
     def update_price_list(self, yahoo_data):
         print("Updating prices")
         ready = False
         price = 0
 
         for count, symbol in enumerate(yahoo_data):
-            time.sleep(1)
             try:
                 ticker_data = yahoo_data[symbol]
                 if ticker_data["regularMarketPrice"]:
@@ -133,14 +137,15 @@ class LivePriceUpdate:
                 ready = True
 
         if ready:
-            time.sleep(10)
+            time.sleep(1)
             self.send_price_alert()
 
     def send_price_alert(self):
-        time.sleep(2)
         ticker_watchers = TickerWatcher.objects.filter(
             Q(ticker__price__lt=F("min_price")) or Q(ticker__price__gt=F("max_price"))
         )
+        time.sleep(1)
+        print(f"Ticker Watchers out of range {ticker_watchers.count()}")
 
         if ticker_watchers.count() == 0:
             print("No ticker watchers out of range")
@@ -148,7 +153,6 @@ class LivePriceUpdate:
 
         self.ticker_watchers = ticker_watchers
 
-        print(ticker_watchers)
         watcher_list = {}
 
         for ticker_watcher in ticker_watchers:
@@ -177,6 +181,7 @@ class LivePriceUpdate:
 
             message = ""
             for watcher in watchers:
+                # region
                 message += f"""
                 ---------------------
 
@@ -186,16 +191,11 @@ class LivePriceUpdate:
                 {watcher['symbol']}
                 (MIN: {watcher['min_price']} - MAX: {watcher['max_price']})
                 Current Price: {'↓' if watcher['price'] < watcher['min_price'] else ''}{'↑' if watcher['price'] > watcher['max_price'] else ''}{watcher['price']}"""
+                # endregion
 
             if len(message) > 0:
-                # twilio.send_message_to_admin(message)
+                print("Attempting to send price alerts")
                 self.twilio.send_message_to_watcher(message, phone)
-
-        print(f"Watcher list {watcher_list}")
-        if len(watcher_list.keys()):
-            print("Sending price alerts")
-
-        return watcher_list
 
     # Limited by API
     def get_quote_from_finnhub(self):

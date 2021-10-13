@@ -7,7 +7,6 @@ from StockWatcher.lib.helpers.stockWatcher.Messaging.twilio_notifications.middle
 
 
 class TwilioMessenger:
-
     def __init__(self):
         self.client = MessageClient()
 
@@ -18,7 +17,6 @@ class TwilioMessenger:
 
     def send_message_to_watcher(self, body, to):
         to = f"+1{to}"
-        print(f"Sending message to {to}")
 
         if (
             to == os.environ["TWILIO_ADMINS_PHONE"]
