@@ -123,9 +123,9 @@ class LivePriceUpdate:
                 if ticker_data["regularMarketPrice"]:
                     price = ticker_data["regularMarketPrice"]
                     ticker = Ticker.objects.get(symbol=symbol)
+                    print(f"Updated Symbol: {symbol}, Price: {ticker.price} to {price}")
                     ticker.price = price
                     ticker.save()
-                    print(f"Updated Symbol: {symbol}, Price: {price}")
             except:
                 print(f"Error updating prices for {symbol}")
 
