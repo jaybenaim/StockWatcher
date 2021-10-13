@@ -1,5 +1,6 @@
 # from datetime import datetime, timedelta
 from time import time
+from background_task.tasks import Tasks
 
 # from StockWatcher.lib.helpers.stockWatcher.LiveUpdate import LivePriceUpdate
 from celery.schedules import crontab
@@ -52,7 +53,7 @@ def setup_periodic_tasks(sender, **kwargs):
         # TEST
         # 1800,
         60,
-        refresh_symbols.delay(),
+        refresh_symbols.s(),
         name="stocks refreshed every 30 minutes",
     )
 
@@ -72,8 +73,25 @@ def refresh_symbols():
     live_update = LivePriceUpdate()
     live_update.get_quotes_from_yahoo()
 
-    # may need for big list of ticker_watchers (time to load can take unknown time)
-    # send_message_if_ticker_watcher_is_out_of_range.delay()
+
+from background_task import background
+
+
+@background(schedule=60)
+def refresh():
+    """Refresh the Tickers price with the current live price"""
+    # print(f'Keeping heroku alive')
+    # logger.info(f'Keeping Heroku alive')
+    # response = requests.get('/')
+    # logger.debug(response)
+    # print(response)
+    # logger.info(f"Getting price updates for these tickers: {all_ticker_symbols}")
+    live_update = LivePriceUpdate()
+    live_update.get_quotes_from_yahoo()
+
+
+# may need for big list of ticker_watchers (time to load can take unknown time)
+# send_message_if_ticker_watcher_is_out_of_range.delay()
 
 
 # @app.task

@@ -48,6 +48,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "background_task",
     "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
