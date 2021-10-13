@@ -196,6 +196,11 @@ class LivePriceUpdate:
         ticker_watchers = TickerWatcher.objects.filter(
             Q(ticker__price__lt=F("min_price")) or Q(ticker__price__gt=F("max_price"))
         )
+
+        if ticker_watchers.count() == 0:
+            print("No ticker watchers out of range")
+            return
+
         self.ticker_watchers = ticker_watchers
         time.sleep(2)
 
