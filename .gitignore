@@ -1,4 +1,4 @@
 node_modules/
 .env
 *.pyc
-celerybeat-schedule.db
+./celerybeat-schedule.db
