@@ -190,16 +190,18 @@ class LivePriceUpdate:
         ws.run_forever()
 
     def send_price_alert(self):
-        time.sleep(1)
         ticker_watchers = TickerWatcher.objects.all()
         self.ticker_watchers = ticker_watchers
-        time.sleep(1)
+        time.sleep(2)
         watcher_list = {}
 
         for ticker_watcher in ticker_watchers:
             ticker = ticker_watcher.ticker
             user_email = ticker_watcher.get_user()
             user_phone = ticker_watcher.get_phone()
+            print(
+                f"Tkr: {ticker.symbol}; min: {ticker_watcher.min_price}; max: {ticker_watcher.max_price}"
+            )
             if (ticker.price < ticker_watcher.min_price) or (
                 ticker.price > ticker_watcher.max_price
             ):
