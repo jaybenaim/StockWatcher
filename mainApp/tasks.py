@@ -62,6 +62,7 @@ def refresh_symbols():
     # logger.info(f"Getting price updates for these tickers: {all_ticker_symbols}")
     live_update = LivePriceUpdate()
     live_update.get_quotes_from_yahoo()
+
     # may need for big list of ticker_watchers (time to load can take unknown time)
     # send_message_if_ticker_watcher_is_out_of_range.delay()
 

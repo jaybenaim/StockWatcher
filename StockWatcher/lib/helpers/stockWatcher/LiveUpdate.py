@@ -15,6 +15,8 @@ from yahoofinancials import YahooFinancials
 from django.core import serializers
 from mainApp.models import Ticker, TickerWatcher
 from django.shortcuts import get_object_or_404, render
+from django.db.models import Q
+from django.db.models import F
 
 FINNHUB_KEY = os.environ["FINNHUB_KEY"]
 POLYGON_KEY = os.environ["POLYGON_KEY"]
@@ -92,11 +94,11 @@ class LivePriceUpdate:
 
     # GET Multiple FREE_REALTIME YAHOOFINANCES PYPI
     def get_quotes_from_yahoo(self):
-        all_ticker_watchers = TickerWatcher.objects.values_list(
+        all_ticker_symbols = TickerWatcher.objects.values_list(
             "ticker__symbol", flat=True
         ).distinct()
 
-        self.symbols = all_ticker_watchers
+        self.symbols = all_ticker_symbols
 
         data = None
         if self.symbols:
@@ -190,9 +192,14 @@ class LivePriceUpdate:
         ws.run_forever()
 
     def send_price_alert(self):
-        ticker_watchers = TickerWatcher.objects.all()
+        # ticker_watchers = TickerWatcher.objects.all()
+        ticker_watchers = TickerWatcher.objects.filter(
+            Q(ticker__price__lt=F("min_price")) or Q(ticker__price__gt=F("max_price"))
+        )
         self.ticker_watchers = ticker_watchers
         time.sleep(2)
+
+        print(ticker_watchers)
         watcher_list = {}
 
         for ticker_watcher in ticker_watchers:
@@ -202,20 +209,18 @@ class LivePriceUpdate:
             print(
                 f"Tkr: {ticker.symbol}; min: {ticker_watcher.min_price}; max: {ticker_watcher.max_price}"
             )
-            if (ticker.price < ticker_watcher.min_price) or (
-                ticker.price > ticker_watcher.max_price
-            ):
-                if user_email not in watcher_list.keys():
-                    watcher_list[user_email] = {"phone": user_phone, "watchers": []}
 
-                watcher_list[user_email]["watchers"].append(
-                    {
-                        "symbol": ticker.symbol,
-                        "price": ticker.price,
-                        "min_price": ticker_watcher.min_price,
-                        "max_price": ticker_watcher.max_price,
-                    }
-                )
+            if user_email not in watcher_list.keys():
+                watcher_list[user_email] = {"phone": user_phone, "watchers": []}
+
+            watcher_list[user_email]["watchers"].append(
+                {
+                    "symbol": ticker.symbol,
+                    "price": ticker.price,
+                    "min_price": ticker_watcher.min_price,
+                    "max_price": ticker_watcher.max_price,
+                }
+            )
 
         for user_email in watcher_list:
             watchers = watcher_list[user_email]["watchers"]
