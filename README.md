@@ -1,6 +1,4 @@
 Stockwatcher 
 
-Create stock alerts 
+Create stock alerts for any stock
 
-------------
-Favourites
